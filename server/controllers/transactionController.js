@@ -2,7 +2,10 @@ const Transaction = require("../models/Transaction");
 
 const addTransaction = async (req, res) => {
     try {
-        const transaction = await Transaction.create(req.body);
+        const transaction = await Transaction.create({
+            ...req.body,
+            user: req.user._id
+        });
 
         res.status(201).json(transaction);
     } catch (error) {
@@ -14,7 +17,9 @@ const addTransaction = async (req, res) => {
 
 const getTransactions = async (req, res) => {
   try {
-    const transactions = await Transaction.find().sort({
+    const transactions = await Transaction.find({
+        user: req.user._id
+    }).sort({
         createdAt: -1,
     });
 
