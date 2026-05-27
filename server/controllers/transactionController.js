@@ -1,4 +1,4 @@
-const Transaction = require("../models/transaction");
+const Transaction = require("../models/Transaction");
 
 const addTransaction = async (req, res) => {
     try {
@@ -32,7 +32,7 @@ const deleteTransaction = async (req, res) => {
        const transaction = await Transaction.findByIdAndDelete(req.params.id);
 
        if(!transaction) {
-        return res.status(404).json({
+        return res.status(400).json({
             message: "No transactions to delete",
         })
        }
@@ -58,7 +58,7 @@ const updateTransaction = async (req, res) => {
         );
 
         if(!transaction) {
-            return res.status(404).json({
+            return res.status(400).json({
                 message: "Transaction not found",
             });
         }
