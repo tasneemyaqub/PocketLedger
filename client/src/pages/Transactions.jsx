@@ -1,150 +1,94 @@
+import { useEffect, useMemo, useState } from "react"
+
 import Sidebar from "../components/Sidebar"
+import TransactionTable from "../components/TransactionTable"
+import { transactionApi } from "../services/api"
 
 function Transactions() {
+  const [transactions, setTransactions] = useState([])
+  const [search, setSearch] = useState("")
+  const [type, setType] = useState("all")
+  const [error, setError] = useState("")
+  const [isLoading, setIsLoading] = useState(true)
 
-  const transactions = [
+  useEffect(() => {
+    const loadTransactions = async () => {
+      try {
+        const data = await transactionApi.list()
+        setTransactions(data)
+      } catch (err) {
+        setError(err.message)
+      } finally {
+        setIsLoading(false)
+      }
+    }
 
-    {
-      title: "Groceries",
-      amount: "- ₹2,000",
-      category: "Food",
-      date: "23 May",
-    },
+    loadTransactions()
+  }, [])
 
-    {
-      title: "Salary",
-      amount: "+ ₹40,000",
-      category: "Income",
-      date: "20 May",
-    },
+  const filteredTransactions = useMemo(() => {
+    return transactions.filter((transaction) => {
+      const matchesType = type === "all" || transaction.transactionType === type
+      const query = search.toLowerCase()
+      const matchesSearch =
+        transaction.category.toLowerCase().includes(query) ||
+        (transaction.note || "").toLowerCase().includes(query)
 
-    {
-      title: "Electricity Bill",
-      amount: "- ₹3,000",
-      category: "Bills",
-      date: "18 May",
-    },
-
-    {
-      title: "Netflix",
-      amount: "- ₹500",
-      category: "Entertainment",
-      date: "15 May",
-    },
-
-  ]
+      return matchesType && matchesSearch
+    })
+  }, [search, transactions, type])
 
   return (
-
     <div className="flex min-h-screen bg-slate-100">
-
       <Sidebar />
 
       <div className="flex-1 p-6">
-
         <h1 className="text-3xl font-bold mb-6">
           Transactions
         </h1>
 
-        <div className="bg-white p-6 rounded-2xl shadow-sm">
-
-          <div className="flex justify-between mb-4">
-
+        <div className="bg-white p-6 rounded-2xl shadow-sm mb-6">
+          <div className="flex justify-between gap-4">
             <input
               type="text"
               placeholder="Search transaction..."
               className="border p-3 rounded-lg w-72 outline-none"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
             />
 
-            <select className="border p-3 rounded-lg outline-none">
-
-              <option>
+            <select
+              className="border p-3 rounded-lg outline-none"
+              value={type}
+              onChange={(e) => setType(e.target.value)}
+            >
+              <option value="all">
                 All
               </option>
 
-              <option>
+              <option value="income">
                 Income
               </option>
 
-              <option>
+              <option value="expense">
                 Expense
               </option>
-
             </select>
-
           </div>
-
-          <table className="w-full">
-
-            <thead>
-
-              <tr className="text-left border-b">
-
-                <th className="pb-3">
-                  Title
-                </th>
-
-                <th className="pb-3">
-                  Amount
-                </th>
-
-                <th className="pb-3">
-                  Category
-                </th>
-
-                <th className="pb-3">
-                  Date
-                </th>
-
-              </tr>
-
-            </thead>
-
-            <tbody>
-
-              {transactions.map((transaction, index) => (
-
-                <tr
-                  key={index}
-                  className="border-b"
-                >
-
-                  <td className="py-4">
-                    {transaction.title}
-                  </td>
-
-                  <td
-                    className={`py-4 ${
-                      transaction.amount.includes("+")
-                        ? "text-emerald-500"
-                        : "text-red-500"
-                    }`}
-                  >
-                    {transaction.amount}
-                  </td>
-
-                  <td className="py-4">
-                    {transaction.category}
-                  </td>
-
-                  <td className="py-4">
-                    {transaction.date}
-                  </td>
-
-                </tr>
-
-              ))}
-
-            </tbody>
-
-          </table>
-
         </div>
 
+        {error && (
+          <p className="mb-4 rounded-lg bg-red-50 p-3 text-sm text-red-600">
+            {error}
+          </p>
+        )}
+
+        <TransactionTable
+          transactions={filteredTransactions}
+          isLoading={isLoading}
+        />
       </div>
-
     </div>
-
   )
 }
 

@@ -1,43 +1,46 @@
 import { useState } from "react"
 
-function TransactionForm({ transactions, setTransactions }) {
+import { transactionApi } from "../services/api"
 
-  const [title, setTitle] = useState("")
+function TransactionForm({ onTransactionCreated }) {
   const [amount, setAmount] = useState("")
   const [type, setType] = useState("")
+  const [category, setCategory] = useState("")
+  const [note, setNote] = useState("")
   const [date, setDate] = useState("")
+  const [error, setError] = useState("")
+  const [isSubmitting, setIsSubmitting] = useState(false)
 
-  const handleSubmit = (e) => {
-
+  const handleSubmit = async (e) => {
     e.preventDefault()
+    setError("")
+    setIsSubmitting(true)
 
-    const newTransaction = {
-      title: title,
+    try {
+      const newTransaction = await transactionApi.create({
+        amount: Number(amount),
+        transactionType: type,
+        category,
+        note,
+        ...(date ? { date } : {}),
+      })
 
-      amount:
-        type === "Income"
-          ? `+ ₹${amount}`
-          : `- ₹${amount}`,
+      onTransactionCreated(newTransaction)
 
-      category: type,
-
-      date: date,
+      setAmount("")
+      setType("")
+      setCategory("")
+      setNote("")
+      setDate("")
+    } catch (err) {
+      setError(err.message)
+    } finally {
+      setIsSubmitting(false)
     }
-
-    setTransactions([
-      newTransaction,
-      ...transactions,
-    ])
-
-    setTitle("")
-    setAmount("")
-    setType("")
-    setDate("")
   }
 
   return (
     <div className="bg-white p-6 rounded-2xl shadow-sm mb-6">
-
       <h2 className="text-xl font-semibold mb-4">
         Add Transaction
       </h2>
@@ -46,74 +49,72 @@ function TransactionForm({ transactions, setTransactions }) {
         onSubmit={handleSubmit}
         className="grid grid-cols-2 gap-4"
       >
-
         <input
           type="text"
-          placeholder="Transaction Title"
+          placeholder="Category"
           className="border p-3 rounded-lg outline-none"
-
-          value={title}
-
-          onChange={(e) =>
-            setTitle(e.target.value)
-          }
+          value={category}
+          onChange={(e) => setCategory(e.target.value)}
+          required
         />
 
         <input
           type="number"
           placeholder="Amount"
           className="border p-3 rounded-lg outline-none"
-
           value={amount}
-
-          onChange={(e) =>
-            setAmount(e.target.value)
-          }
+          onChange={(e) => setAmount(e.target.value)}
+          min="1"
+          required
         />
 
         <select
           className="border p-3 rounded-lg outline-none"
-
           value={type}
-
-          onChange={(e) =>
-            setType(e.target.value)
-          }
+          onChange={(e) => setType(e.target.value)}
+          required
         >
-
           <option value="">
             Select Type
           </option>
 
-          <option>
+          <option value="income">
             Income
           </option>
 
-          <option>
+          <option value="expense">
             Expense
           </option>
-
         </select>
+
+        <input
+          type="text"
+          placeholder="Note"
+          className="border p-3 rounded-lg outline-none"
+          value={note}
+          onChange={(e) => setNote(e.target.value)}
+        />
 
         <input
           type="date"
           className="border p-3 rounded-lg outline-none"
-
           value={date}
-
-          onChange={(e) =>
-            setDate(e.target.value)
-          }
+          onChange={(e) => setDate(e.target.value)}
         />
 
+        {error && (
+          <p className="col-span-2 text-sm text-red-500">
+            {error}
+          </p>
+        )}
+
         <button
-          className="bg-emerald-500 text-white p-3 rounded-lg hover:bg-emerald-600 transition col-span-2"
+          className="bg-emerald-500 text-white p-3 rounded-lg hover:bg-emerald-600 transition col-span-2 disabled:cursor-not-allowed disabled:bg-slate-300"
+          disabled={isSubmitting}
         >
-          Add Transaction
+          {isSubmitting ? "Adding..." : "Add Transaction"}
         </button>
-
       </form>
-
     </div>
   )
 }
