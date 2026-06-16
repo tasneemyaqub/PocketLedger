@@ -9,6 +9,7 @@ import Login from "./pages/Login"
 import Register from "./pages/Register"
 import Dashboard from "./pages/Dashboard"
 import Transactions from "./pages/Transactions"
+import Analytics from "./pages/Analytics"
 import { getToken } from "./services/api"
 
 function ProtectedRoute({ children }) {
@@ -46,6 +47,15 @@ function App() {
           element={
             <ProtectedRoute>
               <Transactions />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/analytics"
+          element={
+            <ProtectedRoute>
+              <Analytics />
             </ProtectedRoute>
           }
         />

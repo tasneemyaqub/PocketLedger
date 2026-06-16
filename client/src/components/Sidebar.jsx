@@ -1,5 +1,4 @@
-import { Link } from "react-router-dom"
-import { useNavigate } from "react-router-dom"
+import { NavLink, useNavigate } from "react-router-dom"
 
 import { clearSession, getUser } from "../services/api"
 
@@ -11,6 +10,11 @@ function Sidebar() {
     clearSession()
     navigate("/")
   }
+
+  const navLinkClass = ({ isActive }) =>
+    `block p-3 rounded-lg cursor-pointer hover:bg-slate-800 ${
+      isActive ? "bg-slate-800" : ""
+    }`
 
   return (
 
@@ -28,24 +32,22 @@ function Sidebar() {
 
       <ul className="space-y-4">
 
-        <Link to="/dashboard">
-
-          <li className="bg-slate-800 p-3 rounded-lg cursor-pointer hover:bg-slate-700">
+        <li>
+          <NavLink to="/dashboard" className={navLinkClass}>
             Dashboard
-          </li>
+          </NavLink>
+        </li>
 
-        </Link>
-
-        <Link to="/transactions">
-
-          <li className="p-3 rounded-lg cursor-pointer hover:bg-slate-800">
+        <li>
+          <NavLink to="/transactions" className={navLinkClass}>
             Transactions
-          </li>
+          </NavLink>
+        </li>
 
-        </Link>
-
-        <li className="p-3 rounded-lg cursor-pointer hover:bg-slate-800">
-          Analytics
+        <li>
+          <NavLink to="/analytics" className={navLinkClass}>
+            Analytics
+          </NavLink>
         </li>
 
         <li
