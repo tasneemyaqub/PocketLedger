@@ -17,19 +17,24 @@ function Dashboard() {
   const [transactions, setTransactions] = useState([])
   const [error, setError] = useState("")
   const [isLoading, setIsLoading] = useState(true)
+  const [selectedTransaction, setSelectedTransaction] = useState(null)
+
+  const loadTransactions = async () => {
+    setIsLoading(true)
+
+    try {
+      const data = await transactionApi.list()
+      setTransactions(data)
+      setError("")
+    } catch (err) {
+      setError(err.message)
+    } finally {
+      setIsLoading(false)
+    }
+  }
 
   useEffect(() => {
-    const loadTransactions = async () => {
-      try {
-        const data = await transactionApi.list()
-        setTransactions(data)
-      } catch (err) {
-        setError(err.message)
-      } finally {
-        setIsLoading(false)
-      }
-    }
-
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     loadTransactions()
   }, [])
 
@@ -55,11 +60,9 @@ function Dashboard() {
     )
   }, [transactions])
 
-  const handleTransactionCreated = (transaction) => {
-    setTransactions((current) => [
-      transaction,
-      ...current,
-    ])
+  const handleTransactionSaved = async () => {
+    await loadTransactions()
+    setSelectedTransaction(null)
   }
 
   return (
@@ -67,11 +70,17 @@ function Dashboard() {
       <Sidebar />
 
       <div className="flex-1 p-6">
-        <h1 className="text-3xl font-bold mb-6">
-          Dashboard
-        </h1>
+        <div className="mb-6">
+          <p className="text-sm font-medium uppercase tracking-wide text-emerald-600">
+            PocketLedger
+          </p>
 
-        <div className="grid grid-cols-3 gap-4 mb-6">
+          <h1 className="text-3xl font-bold text-slate-950">
+            Dashboard
+          </h1>
+        </div>
+
+        <div className="mb-6 grid gap-4 md:grid-cols-3">
           <SummaryCard
             title="Total Balance"
             amount={formatCurrency(summary.balance)}
@@ -88,7 +97,13 @@ function Dashboard() {
           />
         </div>
 
-        <TransactionForm onTransactionCreated={handleTransactionCreated} />
+        <TransactionForm
+          key={selectedTransaction?._id || "new-transaction"}
+          selectedTransaction={selectedTransaction}
+          transactions={transactions}
+          onTransactionSaved={handleTransactionSaved}
+          onCancelEdit={() => setSelectedTransaction(null)}
+        />
 
         {error && (
           <p className="mb-4 rounded-lg bg-red-50 p-3 text-sm text-red-600">
@@ -99,6 +114,7 @@ function Dashboard() {
         <TransactionTable
           transactions={transactions}
           isLoading={isLoading}
+          onEdit={setSelectedTransaction}
         />
       </div>
     </div>

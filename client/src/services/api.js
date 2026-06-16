@@ -58,15 +58,15 @@ export const transactionApi = {
       method: "POST",
       body: JSON.stringify(payload),
     }),
+  update: (id, payload) =>
+    request(`/transactions/${id}`, {
+      method: "PUT",
+      body: JSON.stringify(payload),
+    }),
   remove: (id) =>
     request(`/transactions/${id}`, {
       method: "DELETE",
     }),
-    update: (id, payload) =>
-  request(`/transactions/${id}`, {
-    method: "PUT",
-    body: JSON.stringify(payload),
-  }),
 }
 
 export { clearSession, getToken, getUser, setSession }
