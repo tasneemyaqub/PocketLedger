@@ -1,8 +1,11 @@
-const Transaction = require("../models/Transaction");
+const Transaction = require("../models/transaction");
 
 const addTransaction = async (req, res) => {
     try {
-        const transaction = await Transaction.create(req.body);
+        const transaction = await Transaction.create({
+            ...req.body,
+            user: req.user._id
+        });
 
         res.status(201).json(transaction);
     } catch (error) {
@@ -14,7 +17,9 @@ const addTransaction = async (req, res) => {
 
 const getTransactions = async (req, res) => {
   try {
-    const transactions = await Transaction.find().sort({
+    const transactions = await Transaction.find({
+        user: req.user._id
+    }).sort({
         createdAt: -1,
     });
 
@@ -48,8 +53,11 @@ const deleteTransaction = async (req, res) => {
 
 const updateTransaction = async (req, res) => {
     try {
-        const transaction = await Transaction.findByIdAndUpdate(
-            req.params.id,
+        const transaction = await Transaction.findOneAndUpdate(
+            {
+                _id: req.params.id,
+                user: req.user._id,
+            },
             req.body,
             {
                 new: true,
@@ -66,7 +74,7 @@ const updateTransaction = async (req, res) => {
         res.status(200).json(transaction);
     } catch (error) {
         res.status(500).json({
-            message: error.messagel,
+            message: error.message,
         });
     }
 };
