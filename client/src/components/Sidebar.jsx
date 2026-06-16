@@ -27,9 +27,13 @@ function Sidebar() {
 
         </Link>
 
-        <li className="p-3 rounded-lg cursor-pointer hover:bg-slate-800">
-          Analytics
-        </li>
+        <Link to="/analytics">
+
+      <li className="p-3 rounded-lg cursor-pointer hover:bg-slate-800">
+       Analytics
+      </li>
+
+</Link>
 
         <Link to="/">
 
